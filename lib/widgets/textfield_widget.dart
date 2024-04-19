@@ -64,10 +64,10 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
             children: [
               TextSpan(
                 text: widget.label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontFamily: 'Bold',
-                  color: primary,
+                  color: Colors.pink,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -110,7 +110,7 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
             keyboardType: widget.inputType,
             decoration: InputDecoration(
               filled: true,
-              fillColor: grey.withOpacity(0.2),
+              fillColor: Colors.white,
               suffixIcon: widget.showEye! == true
                   ? IconButton(
                       onPressed: () {
