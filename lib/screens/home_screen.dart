@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mcakes/screens/cart_screen.dart';
+import 'package:mcakes/screens/profile_screen.dart';
 import 'package:mcakes/screens/tabs/about_us_tab.dart';
 import 'package:mcakes/screens/tabs/home_tab.dart';
 import 'package:mcakes/screens/tabs/store_tab.dart';
@@ -72,7 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 50,
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const CartScreen()));
+                    },
                     icon: const Icon(
                       Icons.shopping_cart_outlined,
                     ),
@@ -81,7 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 20,
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const ProfileScreen()));
+                    },
                     icon: const Icon(
                       Icons.account_circle_outlined,
                     ),
