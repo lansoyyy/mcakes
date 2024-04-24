@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mcakes/screens/tabs/about_us_tab.dart';
 import 'package:mcakes/screens/tabs/home_tab.dart';
 import 'package:mcakes/screens/tabs/store_tab.dart';
 import 'package:mcakes/widgets/button_widget.dart';
+import 'package:mcakes/widgets/contact_us_widget.dart';
 import 'package:mcakes/widgets/text_widget.dart';
 import 'package:mcakes/widgets/textfield_widget.dart';
 
@@ -93,8 +95,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: TabBarView(children: [
                   HomeTab(),
                   StoreTab(),
-                  SizedBox(),
-                  SizedBox(),
+                  AboutUsTab(),
+                  ContactUsWidget(),
                 ]),
               ),
             ],

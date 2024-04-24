@@ -1,192 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:mcakes/widgets/contact_us_widget.dart';
-import 'package:mcakes/widgets/footer_widget.dart';
+import 'package:mcakes/utlis/colors.dart';
 import 'package:mcakes/widgets/locate_us_widget.dart';
 
-import '../../utlis/colors.dart';
 import '../../widgets/button_widget.dart';
+import '../../widgets/contact_us_widget.dart';
+import '../../widgets/footer_widget.dart';
 import '../../widgets/text_widget.dart';
 import '../../widgets/textfield_widget.dart';
 
-class HomeTab extends StatefulWidget {
-  const HomeTab({super.key});
+class AboutUsTab extends StatefulWidget {
+  const AboutUsTab({super.key});
 
   @override
-  State<HomeTab> createState() => _HomeTabState();
+  State<AboutUsTab> createState() => _AboutUsTabState();
 }
 
-class _HomeTabState extends State<HomeTab> {
-  final name = TextEditingController();
-  final email = TextEditingController();
-  final phone = TextEditingController();
-  final ordernumber = TextEditingController();
-  final message = TextEditingController();
+class _AboutUsTabState extends State<AboutUsTab> {
   final newemail = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            height: 500,
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-            ),
-          ),
-          Center(
-            child: TextWidget(
-              text: 'WHAT YOU CAN DO',
-              fontSize: 48,
-              fontFamily: 'Bold',
-            ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextWidget(
-                    text: 'Freshed bakes cakes\n and pastries',
-                    fontSize: 32,
-                    fontFamily: 'Bold',
-                  ),
-                  TextWidget(
-                    maxLines: 5,
-                    text:
-                        'Get a taste of our freshly prepared\ncakes by ordering online',
-                    fontSize: 18,
-                    fontFamily: 'Regular',
-                    color: Colors.grey,
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextWidget(
-                    text: 'Different Shops',
-                    fontSize: 32,
-                    fontFamily: 'Bold',
-                  ),
-                  TextWidget(
-                    maxLines: 5,
-                    text:
-                        'You can choose different shops and order your cakes\nand pastries with your favourite glazing, toppings, color and more!',
-                    fontSize: 18,
-                    fontFamily: 'Regular',
-                    color: Colors.grey,
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextWidget(
-                    text: 'Custom cake box',
-                    fontSize: 32,
-                    fontFamily: 'Bold',
-                  ),
-                  TextWidget(
-                    maxLines: 5,
-                    text:
-                        'You can add  different types of\ncakes in a box and we deliver it to you!',
-                    fontSize: 18,
-                    fontFamily: 'Regular',
-                    color: Colors.grey,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Container(
-            width: double.infinity,
-            height: 300,
-            decoration: BoxDecoration(
-              color: Colors.pink[100],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TextWidget(
-                  text: 'Open your online bakeshop store!',
-                  fontSize: 32,
-                  fontFamily: 'Bold',
-                  color: Colors.white,
-                ),
-                TextWidget(
-                  maxLines: 5,
-                  text: 'Your baked goods all in one place!',
-                  fontSize: 18,
-                  fontFamily: 'Regular',
-                  color: Colors.white,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ButtonWidget(
-                  radius: 100,
-                  color: primary,
-                  label: 'Create my store',
-                  onPressed: () {},
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Center(
-            child: TextWidget(
-              text: 'HOW TO ORDER',
-              fontSize: 48,
-              fontFamily: 'Bold',
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextWidget(
-                text: 'Choose your cake',
-                fontSize: 24,
-                fontFamily: 'Bold',
-              ),
-              TextWidget(
-                text: 'Add to cart',
-                fontSize: 24,
-                fontFamily: 'Bold',
-              ),
-              TextWidget(
-                text: 'Checkout',
-                fontSize: 24,
-                fontFamily: 'Bold',
-              ),
-              TextWidget(
-                text: 'We pack it up',
-                fontSize: 24,
-                fontFamily: 'Bold',
-              ),
-              TextWidget(
-                text: 'Fast Delivery',
-                fontSize: 24,
-                fontFamily: 'Bold',
-              ),
-            ],
-          ),
           const SizedBox(
             height: 20,
           ),
