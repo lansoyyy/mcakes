@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcakes/screens/auth/business_login_screen.dart';
 import 'package:mcakes/screens/auth/login_screen.dart';
+import 'package:mcakes/screens/business/business_home_screen.dart';
 import 'package:mcakes/screens/home_screen.dart';
 
 void main() {
@@ -13,9 +14,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'MCakes',
-      home: LoginPage(),
+      home: BusinessHomeScreen(),
     );
   }
 }

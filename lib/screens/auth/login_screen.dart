@@ -5,6 +5,7 @@ import 'package:mcakes/widgets/text_widget.dart';
 import '../../utlis/colors.dart';
 import '../../widgets/button_widget.dart';
 import '../../widgets/textfield_widget.dart';
+import '../home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -100,7 +101,10 @@ class _LoginPageState extends State<LoginPage> {
                       child: ButtonWidget(
                           color: primary,
                           label: 'Login',
-                          onPressed: (() async {})),
+                          onPressed: (() async {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const HomeScreen()));
+                          })),
                     ),
                     const SizedBox(
                       height: 20,
