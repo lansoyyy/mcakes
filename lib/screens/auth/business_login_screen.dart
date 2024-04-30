@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:mcakes/screens/business/business_home_screen.dart';
+import 'package:mcakes/services/add_business.dart';
 import 'package:mcakes/widgets/text_widget.dart';
-
+import 'package:mcakes/widgets/toast_widget.dart';
+import 'dart:html';
 import '../../utlis/colors.dart';
 import '../../widgets/button_widget.dart';
 import '../../widgets/textfield_widget.dart';
@@ -18,6 +22,9 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
   final password = TextEditingController();
 
   final email = TextEditingController();
+  final newpassword = TextEditingController();
+
+  final newemail = TextEditingController();
 
   final name = TextEditingController();
   final desc = TextEditingController();
@@ -25,6 +32,29 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
   final opening = TextEditingController();
   final closing = TextEditingController();
   final deliveryfee = TextEditingController();
+  late String? imgUrl = '';
+
+  uploadToStorage() {
+    InputElement input = FileUploadInputElement() as InputElement
+      ..accept = 'image/*';
+    FirebaseStorage fs = FirebaseStorage.instance;
+    input.click();
+    input.onChange.listen((event) {
+      final file = input.files!.first;
+      final reader = FileReader();
+      reader.readAsDataUrl(file);
+      reader.onLoadEnd.listen((event) async {
+        var snapshot = await fs.ref().child('newfile').putBlob(file);
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        showToast('Uploaded Succesfully!');
+        print(downloadUrl);
+        setState(() {
+          imgUrl = downloadUrl;
+        });
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,14 +111,14 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                       height: 20,
                     ),
                     TextFieldWidget(
-                        label: 'Business Email: ', controller: email),
+                        label: 'Business Email: ', controller: newemail),
                     const SizedBox(
                       height: 20,
                     ),
                     TextFieldWidget(
                         isObscure: true,
                         label: 'Password: ',
-                        controller: password),
+                        controller: newpassword),
                     // TextButton(
                     //     onPressed: (() {}),
                     //     child: TextBold(
@@ -103,8 +133,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                           color: primary,
                           label: 'Login',
                           onPressed: (() async {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => BusinessHomeScreen()));
+                            login(context);
                           })),
                     ),
                     const SizedBox(
@@ -182,10 +211,26 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    Container(
-                      height: 250,
-                      width: double.infinity,
-                      color: Colors.grey,
+                    GestureDetector(
+                      onTap: () {
+                        //Image? fromPicker =
+                        //     await ImagePickerWeb.getImageAsWidget();
+                        uploadToStorage();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey[500],
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
+                          child: TextWidget(
+                            text: 'Upload logo',
+                            fontSize: 14,
+                            fontFamily: 'Bold',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(
                       height: 10,
@@ -239,8 +284,6 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                       height: 10,
                     ),
                     TextFieldWidget(
-                      showEye: true,
-                      isObscure: true,
                       color: Colors.black,
                       controller: email,
                       label: 'Business Email',
@@ -263,7 +306,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                           color: primary,
                           label: 'Create',
                           onPressed: (() async {
-                            Navigator.pop(context);
+                            register(context);
                           })),
                     ),
                   ],
@@ -274,5 +317,59 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
         );
       },
     );
+  }
+
+  register(context) async {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email.text, password: password.text);
+
+      // signup(nameController.text, numberController.text, addressController.text,
+      //     emailController.text);
+
+      addBusiness(name.text, caption.text, desc.text, opening.text,
+          closing.text, deliveryfee.text, imgUrl);
+
+      showToast("Registered Successfully!");
+
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        showToast('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        showToast('The account already exists for that email.');
+      } else if (e.code == 'invalid-email') {
+        showToast('The email address is not valid.');
+      } else {
+        showToast(e.toString());
+      }
+    } on Exception catch (e) {
+      showToast("An error occurred: $e");
+    }
+  }
+
+  login(context) async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: newemail.text, password: newpassword.text);
+
+      showToast('Logged in succesfully!');
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => BusinessHomeScreen()));
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        showToast("No user found with that email.");
+      } else if (e.code == 'wrong-password') {
+        showToast("Wrong password provided for that user.");
+      } else if (e.code == 'invalid-email') {
+        showToast("Invalid email provided.");
+      } else if (e.code == 'user-disabled') {
+        showToast("User account has been disabled.");
+      } else {
+        showToast("An error occurred: ${e.message}");
+      }
+    } on Exception catch (e) {
+      showToast("An error occurred: $e");
+    }
   }
 }

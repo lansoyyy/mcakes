@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mcakes/screens/auth/business_login_screen.dart';
+import 'package:mcakes/services/add_user.dart';
 import 'package:mcakes/widgets/text_widget.dart';
+import 'package:mcakes/widgets/toast_widget.dart';
 
 import '../../utlis/colors.dart';
 import '../../widgets/button_widget.dart';
@@ -18,10 +21,10 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   final emailController = TextEditingController();
-
   final newpasswordController = TextEditingController();
 
   final newemailController = TextEditingController();
+
   final name = TextEditingController();
   final number = TextEditingController();
   @override
@@ -80,14 +83,14 @@ class _LoginPageState extends State<LoginPage> {
                       height: 20,
                     ),
                     TextFieldWidget(
-                        label: 'Email: ', controller: emailController),
+                        label: 'Email: ', controller: newemailController),
                     const SizedBox(
                       height: 20,
                     ),
                     TextFieldWidget(
                         isObscure: true,
                         label: 'Password: ',
-                        controller: passwordController),
+                        controller: newpasswordController),
                     // TextButton(
                     //     onPressed: (() {}),
                     //     child: TextBold(
@@ -102,8 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                           color: primary,
                           label: 'Login',
                           onPressed: (() async {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const HomeScreen()));
+                            login(context);
                           })),
                     ),
                     const SizedBox(
@@ -220,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                         color: primary,
                         label: 'Create',
                         onPressed: (() async {
-                          Navigator.pop(context);
+                          register(context);
                         })),
                   ),
                 ],
@@ -230,5 +232,58 @@ class _LoginPageState extends State<LoginPage> {
         );
       },
     );
+  }
+
+  register(context) async {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text, password: passwordController.text);
+
+      addUser(name.text, emailController.text, number.text);
+
+      // signup(nameController.text, numberController.text, addressController.text,
+      //     emailController.text);
+
+      showToast("Registered Successfully!");
+
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        showToast('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        showToast('The account already exists for that email.');
+      } else if (e.code == 'invalid-email') {
+        showToast('The email address is not valid.');
+      } else {
+        showToast(e.toString());
+      }
+    } on Exception catch (e) {
+      showToast("An error occurred: $e");
+    }
+  }
+
+  login(context) async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: newemailController.text, password: newpasswordController.text);
+
+      showToast('Logged in succesfully!');
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()));
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        showToast("No user found with that email.");
+      } else if (e.code == 'wrong-password') {
+        showToast("Wrong password provided for that user.");
+      } else if (e.code == 'invalid-email') {
+        showToast("Invalid email provided.");
+      } else if (e.code == 'user-disabled') {
+        showToast("User account has been disabled.");
+      } else {
+        showToast("An error occurred: ${e.message}");
+      }
+    } on Exception catch (e) {
+      showToast("An error occurred: $e");
+    }
   }
 }
