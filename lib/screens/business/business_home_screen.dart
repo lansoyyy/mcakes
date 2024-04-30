@@ -138,7 +138,7 @@ class BusinessHomeScreen extends StatelessWidget {
                               color: Colors.white,
                             ),
                             TextWidget(
-                              text: 'Barato na, Lami pa!',
+                              text: data['caption'],
                               fontSize: 24,
                               fontFamily: 'Bold',
                               color: Colors.white,
@@ -167,8 +167,8 @@ class BusinessHomeScreen extends StatelessWidget {
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.all(20.0),
-                                      child: Image.asset(
-                                        'assets/images/profile.png',
+                                      child: Image.network(
+                                        data['img'],
                                         height: 200,
                                       ),
                                     ),
@@ -196,7 +196,7 @@ class BusinessHomeScreen extends StatelessWidget {
                                   height: 10,
                                 ),
                                 TextWidget(
-                                  text: 'Creating Imagination to Reality.',
+                                  text: data['desc'],
                                   fontSize: 18,
                                   color: Colors.black,
                                 ),
@@ -205,17 +205,18 @@ class BusinessHomeScreen extends StatelessWidget {
                                   height: 5,
                                 ),
                                 TextWidget(
-                                  text: 'Opening Time: 8:00 AM',
+                                  text: 'Opening Time: ${data['opening']}',
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                                 TextWidget(
-                                  text: 'Closing Time: 5:00 PM',
+                                  text: 'Closing Time: ${data['closing']}',
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                                 TextWidget(
-                                  text: 'Delivery Fee: 100 Php',
+                                  text:
+                                      'Delivery Fee: ${data['deliveryfee']} Php',
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
