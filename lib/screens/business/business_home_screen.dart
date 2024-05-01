@@ -1,14 +1,24 @@
+import 'dart:html';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:mcakes/services/add_product.dart';
 import 'package:mcakes/widgets/textfield_widget.dart';
+import 'package:mcakes/widgets/toast_widget.dart';
 
 import '../../utlis/colors.dart';
 import '../../widgets/text_widget.dart';
 
-class BusinessHomeScreen extends StatelessWidget {
-  BusinessHomeScreen({super.key});
+class BusinessHomeScreen extends StatefulWidget {
+  const BusinessHomeScreen({super.key});
 
+  @override
+  State<BusinessHomeScreen> createState() => _BusinessHomeScreenState();
+}
+
+class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final Stream<DocumentSnapshot> userData = FirebaseFirestore.instance
@@ -43,10 +53,27 @@ class BusinessHomeScreen extends StatelessWidget {
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              width: double.infinity,
-                              height: 150,
-                              color: Colors.grey[200],
+                            GestureDetector(
+                              onTap: () {
+                                //Image? fromPicker =
+                                //     await ImagePickerWeb.getImageAsWidget();
+                                uploadToStorage();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[500],
+                                    borderRadius: BorderRadius.circular(5)),
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 5, 20, 5),
+                                  child: TextWidget(
+                                    text: 'Upload Image',
+                                    fontSize: 14,
+                                    fontFamily: 'Bold',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
                             ),
                             const SizedBox(
                               height: 10,
@@ -65,28 +92,6 @@ class BusinessHomeScreen extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(
-                                    Icons.remove,
-                                  ),
-                                ),
-                                TextWidget(
-                                  text: '0',
-                                  fontSize: 24,
-                                  fontFamily: 'Bold',
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(
-                                    Icons.add,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                         actions: [
@@ -103,6 +108,7 @@ class BusinessHomeScreen extends StatelessWidget {
                           ),
                           TextButton(
                             onPressed: () {
+                              addProduct(name.text, price.text, imgUrl);
                               Navigator.pop(context);
                             },
                             child: TextWidget(
@@ -260,7 +266,7 @@ class BusinessHomeScreen extends StatelessWidget {
                                 height: 500,
                                 child: TabBarView(
                                   children: [
-                                    product(),
+                                    product(false),
                                     history(),
                                     orders(),
                                   ],
@@ -280,24 +286,177 @@ class BusinessHomeScreen extends StatelessWidget {
   }
 
   final name = TextEditingController();
+
   final price = TextEditingController();
 
-  Widget product() {
-    return SizedBox(
-      width: 900,
-      height: 500,
-      child: GridView.builder(
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
+  Widget product(bool inedit) {
+    return StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('Products')
+            .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            print('error');
+            return const Center(child: Text('Error'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.only(top: 50),
+              child: Center(
+                  child: CircularProgressIndicator(
+                color: Colors.black,
+              )),
+            );
+          }
+
+          final data = snapshot.requireData;
+          return SizedBox(
+            width: 900,
+            height: 500,
+            child: GridView.builder(
+              itemCount: data.docs.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      name.text = '${data.docs[index]['name']}';
+                      price.text = '${data.docs[index]['price']}';
+                    });
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content:
+                              StatefulBuilder(builder: (context, setState) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: 150,
+                                  color: Colors.grey[200],
+                                  child: Image.network(data.docs[index]['img']),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextFieldWidget(
+                                  controller: name,
+                                  label: 'Product Name',
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextFieldWidget(
+                                  controller: price,
+                                  label: 'Product Price',
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                StreamBuilder<QuerySnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection('Products')
+                                        .where('uid',
+                                            isEqualTo: FirebaseAuth
+                                                .instance.currentUser!.uid)
+                                        .snapshots(),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                                      if (snapshot.hasError) {
+                                        print('error');
+                                        return const Center(
+                                            child: Text('Error'));
+                                      }
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Padding(
+                                          padding: EdgeInsets.only(top: 50),
+                                          child: Center(
+                                              child: CircularProgressIndicator(
+                                            color: Colors.black,
+                                          )),
+                                        );
+                                      }
+
+                                      final data1 = snapshot.requireData;
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          IconButton(
+                                            onPressed: () async {
+                                              if (data1.docs[index]['qty'] >
+                                                  0) {
+                                                await FirebaseFirestore.instance
+                                                    .collection('Products')
+                                                    .doc(data1.docs[index].id)
+                                                    .update({
+                                                  'qty':
+                                                      FieldValue.increment(-1)
+                                                });
+
+                                                setState(
+                                                  () {},
+                                                );
+                                              }
+                                            },
+                                            icon: const Icon(
+                                              Icons.remove,
+                                            ),
+                                          ),
+                                          TextWidget(
+                                            text: '${data1.docs[index]['qty']}',
+                                            fontSize: 24,
+                                            fontFamily: 'Bold',
+                                          ),
+                                          IconButton(
+                                            onPressed: () async {
+                                              await FirebaseFirestore.instance
+                                                  .collection('Products')
+                                                  .doc(data1.docs[index].id)
+                                                  .update({
+                                                'qty': FieldValue.increment(1)
+                                              });
+                                              setState(
+                                                () {},
+                                              );
+                                            },
+                                            icon: const Icon(
+                                              Icons.add,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }),
+                              ],
+                            );
+                          }),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: TextWidget(
+                                text: 'Close',
+                                fontSize: 18,
+                                fontFamily: 'Bold',
+                                color: primary,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: Card(
+                    elevation: 5,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           width: double.infinity,
@@ -307,94 +466,26 @@ class BusinessHomeScreen extends StatelessWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                        TextFieldWidget(
-                          controller: name,
-                          label: 'Product Name',
+                        TextWidget(
+                          text: '${data.docs[index]['name']}',
+                          fontSize: 13,
                         ),
                         const SizedBox(
                           height: 10,
                         ),
-                        TextFieldWidget(
-                          controller: price,
-                          label: 'Product Price',
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.remove,
-                              ),
-                            ),
-                            TextWidget(
-                              text: '0',
-                              fontSize: 24,
-                              fontFamily: 'Bold',
-                            ),
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.add,
-                              ),
-                            ),
-                          ],
+                        TextWidget(
+                          text: '₱${data.docs[index]['price']}.00',
+                          fontSize: 16,
+                          fontFamily: 'Bold',
                         ),
                       ],
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: TextWidget(
-                          text: 'Close',
-                          fontSize: 18,
-                          fontFamily: 'Bold',
-                          color: primary,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: Card(
-              elevation: 5,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 150,
-                    color: Colors.grey[200],
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: 'CHOCO CAKE SLICE',
-                    fontSize: 13,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: '₱150.00',
-                    fontSize: 16,
-                    fontFamily: 'Bold',
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           );
-        },
-      ),
-    );
+        });
   }
 
   Widget history() {
@@ -517,5 +608,28 @@ class BusinessHomeScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  late String? imgUrl = '';
+
+  uploadToStorage() {
+    InputElement input = FileUploadInputElement() as InputElement
+      ..accept = 'image/*';
+    FirebaseStorage fs = FirebaseStorage.instance;
+    input.click();
+    input.onChange.listen((event) {
+      final file = input.files!.first;
+      final reader = FileReader();
+      reader.readAsDataUrl(file);
+      reader.onLoadEnd.listen((event) async {
+        var snapshot = await fs.ref().child('newfile').putBlob(file);
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        showToast('Uploaded Succesfully!');
+        print(downloadUrl);
+        setState(() {
+          imgUrl = downloadUrl;
+        });
+      });
+    });
   }
 }
