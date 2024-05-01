@@ -21,6 +21,8 @@ class _StoreTabState extends State<StoreTab> {
   bool isproduct = false;
 
   String id = '';
+
+  dynamic productData = {};
   @override
   Widget build(BuildContext context) {
     return isproduct
@@ -291,53 +293,84 @@ class _StoreTabState extends State<StoreTab> {
                     const SizedBox(
                       width: 20,
                     ),
-                    SizedBox(
-                      width: 900,
-                      height: 500,
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4),
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                isproduct = true;
-                              });
-                            },
-                            child: Card(
-                              elevation: 5,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    height: 150,
-                                    color: Colors.grey[200],
+                    StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('Products')
+                            .where('uid', isEqualTo: id)
+                            .snapshots(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasError) {
+                            print('error');
+                            return const Center(child: Text('Error'));
+                          }
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 50),
+                              child: Center(
+                                  child: CircularProgressIndicator(
+                                color: Colors.black,
+                              )),
+                            );
+                          }
+
+                          final data = snapshot.requireData;
+                          return SizedBox(
+                            width: 900,
+                            height: 500,
+                            child: GridView.builder(
+                              itemCount: data.docs.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 4),
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      productData = data.docs[index];
+                                      isproduct = true;
+                                    });
+                                  },
+                                  child: Card(
+                                    elevation: 5,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: double.infinity,
+                                          height: 150,
+                                          color: Colors.grey[200],
+                                          child: Image.network(
+                                              data.docs[index]['img']),
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        TextWidget(
+                                          text: data.docs[index]['name'],
+                                          fontSize: 13,
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        TextWidget(
+                                          text:
+                                              '₱${data.docs[index]['price']}.00',
+                                          fontSize: 16,
+                                          fontFamily: 'Bold',
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextWidget(
-                                    text: 'CHOCO CAKE SLICE',
-                                    fontSize: 13,
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextWidget(
-                                    text: '₱150.00',
-                                    fontSize: 16,
-                                    fontFamily: 'Bold',
-                                  ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                           );
-                        },
-                      ),
-                    ),
+                        }),
                   ],
                 ),
               ],
@@ -345,6 +378,8 @@ class _StoreTabState extends State<StoreTab> {
           );
         });
   }
+
+  int qty = 1;
 
   Widget productWidget() {
     return SingleChildScrollView(
@@ -385,6 +420,7 @@ class _StoreTabState extends State<StoreTab> {
                 width: 600,
                 height: 500,
                 color: Colors.grey[200],
+                child: Image.network(productData['img']),
               ),
               const SizedBox(
                 width: 50,
@@ -397,14 +433,14 @@ class _StoreTabState extends State<StoreTab> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     TextWidget(
-                      text: 'Choco Cake Slice',
+                      text: productData['name'],
                       fontSize: 32,
                     ),
                     const SizedBox(
                       height: 10,
                     ),
                     TextWidget(
-                      text: '₱150.00',
+                      text: '₱${productData['price']}.00',
                       fontSize: 24,
                     ),
                     const SizedBox(
@@ -419,7 +455,7 @@ class _StoreTabState extends State<StoreTab> {
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
                         child: TextWidget(
-                          text: '47 stock/s left',
+                          text: '${productData['qty']} stock/s left',
                           fontSize: 12,
                           color: Colors.white,
                         ),
@@ -433,7 +469,13 @@ class _StoreTabState extends State<StoreTab> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            setState(() {
+                              if (qty > 1) {
+                                qty--;
+                              }
+                            });
+                          },
                           icon: const Icon(
                             Icons.remove,
                           ),
@@ -442,14 +484,20 @@ class _StoreTabState extends State<StoreTab> {
                           width: 10,
                         ),
                         TextWidget(
-                          text: '1',
+                          text: qty.toString(),
                           fontSize: 32,
                         ),
                         const SizedBox(
                           width: 10,
                         ),
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            setState(() {
+                              if (productData['qty'] > qty) {
+                                qty++;
+                              }
+                            });
+                          },
                           icon: const Icon(
                             Icons.add,
                           ),
@@ -476,14 +524,6 @@ class _StoreTabState extends State<StoreTab> {
                 ),
               ),
             ],
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          TextWidget(
-            text: 'Description',
-            fontSize: 24,
-            color: Colors.grey,
           ),
           const SizedBox(
             height: 10,
