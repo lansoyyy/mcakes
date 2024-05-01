@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcakes/widgets/toast_widget.dart';
 
 import '../utlis/colors.dart';
 import 'button_widget.dart';
@@ -105,7 +106,15 @@ class _ContactUsWidgetState extends State<ContactUsWidget> {
                     radius: 100,
                     color: primary,
                     label: 'SUBMIT',
-                    onPressed: () {},
+                    onPressed: () {
+                      name.clear();
+                      email.clear();
+                      phone.clear();
+                      ordernumber.clear();
+                      message.clear();
+                      newemail.clear();
+                      showToast('Your message was submitted!');
+                    },
                   ),
                 ],
               ),

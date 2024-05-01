@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcakes/utlis/colors.dart';
 import 'package:mcakes/widgets/locate_us_widget.dart';
+import 'package:mcakes/widgets/toast_widget.dart';
 
 import '../../widgets/button_widget.dart';
 import '../../widgets/contact_us_widget.dart';
@@ -226,7 +227,9 @@ class _AboutUsTabState extends State<AboutUsTab> {
                 width: 100,
                 color: primary,
                 label: 'SUBSCRIBE',
-                onPressed: () {},
+                onPressed: () {
+                  showToast('Your subscription was added!');
+                },
               ),
             ],
           ),
