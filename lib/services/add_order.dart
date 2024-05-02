@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-Future addOrder(businessid, productid, name, price, qty, img) async {
+Future addOrder(businessid, productid, name, price, qty, img, myname) async {
   final docUser = FirebaseFirestore.instance.collection('Orders').doc();
 
   final json = {
+    'myname': myname,
     'name': name,
     'price': price,
     'qty': qty,

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mcakes/services/add_product.dart';
 import 'package:mcakes/widgets/textfield_widget.dart';
 import 'package:mcakes/widgets/toast_widget.dart';
@@ -489,125 +490,224 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
   }
 
   Widget history() {
-    return SizedBox(
-      width: 900,
-      height: 500,
-      child: GridView.builder(
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            child: Card(
-              elevation: 5,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 150,
-                    color: Colors.grey[200],
+    return StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('Orders')
+            .where('businessid',
+                isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .where('status', isEqualTo: 'Completed')
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            print('error');
+            return const Center(child: Text('Error'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.only(top: 50),
+              child: Center(
+                  child: CircularProgressIndicator(
+                color: Colors.black,
+              )),
+            );
+          }
+
+          final data = snapshot.requireData;
+          return SizedBox(
+            width: 900,
+            height: 500,
+            child: GridView.builder(
+              itemCount: data.docs.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  child: Card(
+                    elevation: 5,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 150,
+                          color: Colors.grey[200],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text: data.docs[index]['name'],
+                          fontSize: 13,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text:
+                              '₱${data.docs[index]['price'] * data.docs[index]['qty']}.00',
+                          fontSize: 16,
+                          fontFamily: 'Bold',
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text: DateFormat.yMMMd()
+                              .add_jm()
+                              .format(data.docs[index]['dateTime'].toDate()),
+                          fontSize: 16,
+                          fontFamily: 'Bold',
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text: 'by: ${data.docs[index]['myname']}',
+                          fontSize: 24,
+                          fontFamily: 'Bold',
+                          color: primary,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: 'CHOCO CAKE SLICE',
-                    fontSize: 13,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: '₱300.00',
-                    fontSize: 16,
-                    fontFamily: 'Bold',
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: DateTime.now().toString(),
-                    fontSize: 16,
-                    fontFamily: 'Bold',
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: 'by: John Doe',
-                    fontSize: 24,
-                    fontFamily: 'Bold',
-                    color: primary,
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           );
-        },
-      ),
-    );
+        });
   }
 
   Widget orders() {
-    return SizedBox(
-      width: 900,
-      height: 500,
-      child: GridView.builder(
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            child: Card(
-              elevation: 5,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 150,
-                    color: Colors.grey[200],
+    return StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('Orders')
+            .where('businessid',
+                isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .where('status', isEqualTo: 'Pending')
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            print('error');
+            return const Center(child: Text('Error'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.only(top: 50),
+              child: Center(
+                  child: CircularProgressIndicator(
+                color: Colors.black,
+              )),
+            );
+          }
+
+          final data = snapshot.requireData;
+          return SizedBox(
+            width: 900,
+            height: 500,
+            child: GridView.builder(
+              itemCount: data.docs.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                              title: const Text(
+                                'Complete Order Confirmation',
+                                style: TextStyle(
+                                    fontFamily: 'QBold',
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              content: const Text(
+                                'Are you sure you want to complete this order?',
+                                style: TextStyle(fontFamily: 'QRegular'),
+                              ),
+                              actions: <Widget>[
+                                MaterialButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text(
+                                    'Close',
+                                    style: TextStyle(
+                                        fontFamily: 'QRegular',
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                MaterialButton(
+                                  onPressed: () async {
+                                    await FirebaseFirestore.instance
+                                        .collection('Orders')
+                                        .doc(data.docs[index].id)
+                                        .update({'status': 'Completed'});
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text(
+                                    'Continue',
+                                    style: TextStyle(
+                                        fontFamily: 'QRegular',
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ));
+                  },
+                  child: Card(
+                    elevation: 5,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 150,
+                          color: Colors.grey[200],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text: data.docs[index]['name'],
+                          fontSize: 13,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text:
+                              '₱${data.docs[index]['price'] * data.docs[index]['qty']}.00',
+                          fontSize: 16,
+                          fontFamily: 'Bold',
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text: DateFormat.yMMMd()
+                              .add_jm()
+                              .format(data.docs[index]['dateTime'].toDate()),
+                          fontSize: 16,
+                          fontFamily: 'Bold',
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextWidget(
+                          text: 'by: ${data.docs[index]['myname']}',
+                          fontSize: 24,
+                          fontFamily: 'Bold',
+                          color: primary,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: 'CHOCO CAKE SLICE',
-                    fontSize: 13,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: '₱150.00 x 2 = ₱300.00',
-                    fontSize: 16,
-                    fontFamily: 'Bold',
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: DateTime.now().toString(),
-                    fontSize: 16,
-                    fontFamily: 'Bold',
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextWidget(
-                    text: 'by: John Doe',
-                    fontSize: 24,
-                    fontFamily: 'Bold',
-                    color: primary,
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           );
-        },
-      ),
-    );
+        });
   }
 
   late String? imgUrl = '';
