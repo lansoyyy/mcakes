@@ -138,60 +138,158 @@ class ProfileScreen extends StatelessWidget {
                               fontSize: 18,
                               color: Colors.grey,
                             ),
-                            SizedBox(
-                              width: 900,
-                              height: 500,
-                              child: GridView.builder(
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 4),
-                                itemBuilder: (context, index) {
-                                  return GestureDetector(
-                                    onTap: () {},
-                                    child: Card(
-                                      elevation: 5,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: double.infinity,
-                                            height: 125,
-                                            color: Colors.grey[200],
+                            StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('Orders')
+                                    .where('uid',
+                                        isEqualTo: FirebaseAuth
+                                            .instance.currentUser!.uid)
+                                    .snapshots(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  if (snapshot.hasError) {
+                                    print('error');
+                                    return const Center(child: Text('Error'));
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Padding(
+                                      padding: EdgeInsets.only(top: 50),
+                                      child: Center(
+                                          child: CircularProgressIndicator(
+                                        color: Colors.black,
+                                      )),
+                                    );
+                                  }
+
+                                  final data = snapshot.requireData;
+                                  return SizedBox(
+                                    width: 900,
+                                    height: 500,
+                                    child: GridView.builder(
+                                      itemCount: data.docs.length,
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 4),
+                                      itemBuilder: (context, index) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    AlertDialog(
+                                                      title: const Text(
+                                                        'Cancel Confirmation',
+                                                        style: TextStyle(
+                                                            fontFamily: 'QBold',
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      content: const Text(
+                                                        'Are you sure you want to cancel this order?',
+                                                        style: TextStyle(
+                                                            fontFamily:
+                                                                'QRegular'),
+                                                      ),
+                                                      actions: <Widget>[
+                                                        MaterialButton(
+                                                          onPressed: () =>
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop(true),
+                                                          child: const Text(
+                                                            'Close',
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    'QRegular',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ),
+                                                        MaterialButton(
+                                                          onPressed: () async {
+                                                            await FirebaseFirestore
+                                                                .instance
+                                                                .collection(
+                                                                    'Orders')
+                                                                .doc(data
+                                                                    .docs[index]
+                                                                    .id)
+                                                                .update({
+                                                              'status':
+                                                                  'Cancelled'
+                                                            });
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child: const Text(
+                                                            'Continue',
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    'QRegular',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ));
+                                          },
+                                          child: Card(
+                                            elevation: 5,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                  width: double.infinity,
+                                                  height: 125,
+                                                  child: Image.network(
+                                                      data.docs[index]['img']),
+                                                ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                TextWidget(
+                                                  text: data.docs[index]
+                                                          ['name'] +
+                                                      ' ' +
+                                                      data.docs[index]['qty']
+                                                          .toString(),
+                                                  fontSize: 13,
+                                                ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                TextWidget(
+                                                  text:
+                                                      '₱${data.docs[index]['price'] * data.docs[index]['qty']}.00',
+                                                  fontSize: 16,
+                                                  fontFamily: 'Bold',
+                                                ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                TextWidget(
+                                                  text: data.docs[index]
+                                                      ['status'],
+                                                  fontSize: 12,
+                                                  fontFamily: 'Bold',
+                                                  color: primary,
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          TextWidget(
-                                            text: 'CHOCO CAKE SLICE',
-                                            fontSize: 13,
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          TextWidget(
-                                            text: '₱150.00',
-                                            fontSize: 16,
-                                            fontFamily: 'Bold',
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          TextWidget(
-                                            text: 'Completed',
-                                            fontSize: 12,
-                                            fontFamily: 'Bold',
-                                            color: primary,
-                                          ),
-                                        ],
-                                      ),
+                                        );
+                                      },
                                     ),
                                   );
-                                },
-                              ),
-                            ),
+                                }),
                           ],
                         ),
                       ],
