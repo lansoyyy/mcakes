@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mcakes/services/add_cart.dart';
 import 'package:mcakes/widgets/footer_widget.dart';
 import 'package:mcakes/widgets/text_widget.dart';
 import 'package:intl/intl.dart' show DateFormat, toBeginningOfSentenceCase;
+import 'package:mcakes/widgets/toast_widget.dart';
 import '../../utlis/colors.dart';
 import '../../widgets/button_widget.dart';
 
@@ -515,9 +517,20 @@ class _StoreTabState extends State<StoreTab> {
                       height: 50,
                       label: 'Add to Cart',
                       onPressed: () {
+                        addCart(
+                            productData['uid'],
+                            productData.id,
+                            productData['name'],
+                            productData['price'],
+                            qty,
+                            productData['img']);
+                        // Add to cart func
                         setState(() {
+                          isproduct = false;
                           hasvisited = true;
                         });
+
+                        showToast('Product added to cart!');
                       },
                     ),
                   ],
