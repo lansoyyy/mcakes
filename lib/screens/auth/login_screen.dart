@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: const BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage(
-                            'assets/images/david-holifield-kPxsqUGneXQ-unsplash.png',
+                            'assets/images/david-holifield-kPxsqUGneXQ-unsplash.jpg',
                           ),
                           fit: BoxFit.cover,
                         ),

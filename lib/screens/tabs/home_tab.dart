@@ -34,7 +34,7 @@ class _HomeTabState extends State<HomeTab> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
-                  'assets/images/brooke-lark-pGM4sjt_BdQ-unsplash.png',
+                  'assets/images/brooke-lark-pGM4sjt_BdQ-unsplash.jpg',
                 ),
                 fit: BoxFit.cover,
               ),
