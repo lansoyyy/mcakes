@@ -42,7 +42,7 @@ class _AboutUsTabState extends State<AboutUsTab> {
                       text: 'OUR BAKERS',
                       fontSize: 32,
                       fontFamily: 'Bold',
-                      color: Colors.white,
+                      color: Colors.pink,
                     ),
                   ),
                   const SizedBox(
@@ -56,7 +56,12 @@ class _AboutUsTabState extends State<AboutUsTab> {
                           Container(
                             width: 275,
                             height: 300,
-                            color: Colors.black,
+                            color: Colors.pink,
+                            child: const Icon(
+                              Icons.person_3_outlined,
+                              color: Colors.white,
+                              size: 150,
+                            ),
                           ),
                           Container(
                             width: 275,
@@ -100,7 +105,12 @@ class _AboutUsTabState extends State<AboutUsTab> {
                           Container(
                             width: 275,
                             height: 300,
-                            color: Colors.black,
+                            color: Colors.pink,
+                            child: const Icon(
+                              Icons.person_3_outlined,
+                              color: Colors.white,
+                              size: 150,
+                            ),
                           ),
                           Container(
                             width: 275,
@@ -144,7 +154,12 @@ class _AboutUsTabState extends State<AboutUsTab> {
                           Container(
                             width: 275,
                             height: 300,
-                            color: Colors.black,
+                            color: Colors.pink,
+                            child: const Icon(
+                              Icons.person_3_outlined,
+                              color: Colors.white,
+                              size: 150,
+                            ),
                           ),
                           Container(
                             width: 275,

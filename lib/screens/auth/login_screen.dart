@@ -60,7 +60,12 @@ class _LoginPageState extends State<LoginPage> {
                       height: 450,
                       width: 600,
                       decoration: const BoxDecoration(
-                        color: Colors.grey,
+                        image: DecorationImage(
+                          image: AssetImage(
+                            'assets/images/david-holifield-kPxsqUGneXQ-unsplash.png',
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ],

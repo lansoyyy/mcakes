@@ -27,20 +27,13 @@ class LocateUsWidget extends StatelessWidget {
         Container(
           width: double.infinity,
           height: 500,
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-          ),
-          child: FlutterMap(
-            options: const MapOptions(
-              initialCenter: LatLng(8.3451, 124.9767),
-              initialZoom: 9.2,
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.app',
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                'assets/images/Capture.PNG',
               ),
-            ],
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ],

@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'MCakes',
-      home: LoginPage(),
+      home: HomeScreen(),
     );
   }
 }

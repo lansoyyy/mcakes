@@ -31,8 +31,13 @@ class _HomeTabState extends State<HomeTab> {
           Container(
             width: double.infinity,
             height: 500,
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(
+                  'assets/images/brooke-lark-pGM4sjt_BdQ-unsplash.png',
+                ),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Center(
@@ -209,7 +214,7 @@ class _HomeTabState extends State<HomeTab> {
                       text: 'OUR BAKERS',
                       fontSize: 32,
                       fontFamily: 'Bold',
-                      color: Colors.white,
+                      color: Colors.pink,
                     ),
                   ),
                   const SizedBox(
@@ -223,7 +228,12 @@ class _HomeTabState extends State<HomeTab> {
                           Container(
                             width: 275,
                             height: 300,
-                            color: Colors.black,
+                            color: Colors.pink,
+                            child: const Icon(
+                              Icons.person_3_outlined,
+                              color: Colors.white,
+                              size: 150,
+                            ),
                           ),
                           Container(
                             width: 275,
@@ -267,7 +277,12 @@ class _HomeTabState extends State<HomeTab> {
                           Container(
                             width: 275,
                             height: 300,
-                            color: Colors.black,
+                            color: Colors.pink,
+                            child: const Icon(
+                              Icons.person_3_outlined,
+                              color: Colors.white,
+                              size: 150,
+                            ),
                           ),
                           Container(
                             width: 275,
@@ -311,7 +326,12 @@ class _HomeTabState extends State<HomeTab> {
                           Container(
                             width: 275,
                             height: 300,
-                            color: Colors.black,
+                            color: Colors.pink,
+                            child: const Icon(
+                              Icons.person_3_outlined,
+                              color: Colors.white,
+                              size: 150,
+                            ),
                           ),
                           Container(
                             width: 275,
