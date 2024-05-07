@@ -88,7 +88,12 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                       height: 450,
                       width: 600,
                       decoration: const BoxDecoration(
-                        color: Colors.grey,
+                        image: DecorationImage(
+                          image: AssetImage(
+                            'assets/images/david-holifield-kPxsqUGneXQ-unsplash.jpg',
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ],
@@ -355,7 +360,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
 
       showToast('Logged in succesfully!');
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => BusinessHomeScreen()));
+          MaterialPageRoute(builder: (context) => const BusinessHomeScreen()));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         showToast("No user found with that email.");
