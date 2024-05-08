@@ -379,10 +379,16 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
       // signup(nameController.text, numberController.text, addressController.text,
       //     emailController.text);
 
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email.text, password: password.text);
+
+      await FirebaseAuth.instance.currentUser!.sendEmailVerification();
+
       addBusiness(name.text, caption.text, desc.text, opening.text,
           closing.text, deliveryfee.text, imgUrl, imgUrl1);
 
-      showToast("Registered Successfully!");
+      showToast(
+          "Registered Successfully! A verification process was sent to your email");
 
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
@@ -402,12 +408,17 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
 
   login(context) async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: newemail.text, password: newpassword.text);
 
-      showToast('Logged in succesfully!');
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const BusinessHomeScreen()));
+      if (user.user!.emailVerified) {
+        showToast('Logged in succesfully!');
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const BusinessHomeScreen()));
+      } else {
+        Navigator.pop(context);
+        showToast('Email not verified!');
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         showToast("No user found with that email.");

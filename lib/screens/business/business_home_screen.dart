@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mcakes/screens/auth/login_screen.dart';
 import 'package:mcakes/services/add_product.dart';
 import 'package:mcakes/widgets/textfield_widget.dart';
 import 'package:mcakes/widgets/toast_widget.dart';
@@ -40,90 +41,145 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
             }
             dynamic data = snapshot.data;
             return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                backgroundColor: primary,
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                //Image? fromPicker =
-                                //     await ImagePickerWeb.getImageAsWidget();
-                                uploadToStorage();
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[500],
-                                    borderRadius: BorderRadius.circular(5)),
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(20, 5, 20, 5),
-                                  child: TextWidget(
-                                    text: 'Upload Image',
-                                    fontSize: 14,
-                                    fontFamily: 'Bold',
-                                    color: Colors.white,
+              floatingActionButton: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                    backgroundColor: primary,
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    //Image? fromPicker =
+                                    //     await ImagePickerWeb.getImageAsWidget();
+                                    uploadToStorage();
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey[500],
+                                        borderRadius: BorderRadius.circular(5)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 5, 20, 5),
+                                      child: TextWidget(
+                                        text: 'Upload Image',
+                                        fontSize: 14,
+                                        fontFamily: 'Bold',
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextFieldWidget(
+                                  controller: name,
+                                  label: 'Product Name',
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextFieldWidget(
+                                  controller: price,
+                                  label: 'Product Price',
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: TextWidget(
+                                  text: 'Close',
+                                  fontSize: 18,
+                                  fontFamily: 'Bold',
+                                  color: primary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            TextFieldWidget(
-                              controller: name,
-                              label: 'Product Name',
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            TextFieldWidget(
-                              controller: price,
-                              label: 'Product Price',
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: TextWidget(
-                              text: 'Close',
-                              fontSize: 18,
-                              fontFamily: 'Bold',
-                              color: primary,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              addProduct(name.text, price.text, imgUrl);
-                              Navigator.pop(context);
-                            },
-                            child: TextWidget(
-                              text: 'Add Product',
-                              fontSize: 18,
-                              fontFamily: 'Bold',
-                              color: primary,
-                            ),
-                          ),
-                        ],
+                              TextButton(
+                                onPressed: () {
+                                  addProduct(name.text, price.text, imgUrl);
+                                  Navigator.pop(context);
+                                },
+                                child: TextWidget(
+                                  text: 'Add Product',
+                                  fontSize: 18,
+                                  fontFamily: 'Bold',
+                                  color: primary,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     },
-                  );
-                },
+                  ),
+                  FloatingActionButton(
+                    backgroundColor: primary,
+                    child: const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: const Text(
+                                  'Logout Confirmation',
+                                  style: TextStyle(
+                                      fontFamily: 'QBold',
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                content: const Text(
+                                  'Are you sure you want to Logout?',
+                                  style: TextStyle(fontFamily: 'QRegular'),
+                                ),
+                                actions: <Widget>[
+                                  MaterialButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: const Text(
+                                      'Close',
+                                      style: TextStyle(
+                                          fontFamily: 'QRegular',
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  MaterialButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const LoginPage()));
+                                    },
+                                    child: const Text(
+                                      'Continue',
+                                      style: TextStyle(
+                                          fontFamily: 'QRegular',
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ));
+                    },
+                  ),
+                ],
               ),
               body: Padding(
                 padding: const EdgeInsets.all(20.0),
