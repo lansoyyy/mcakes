@@ -92,6 +92,13 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                                   height: 10,
                                 ),
                                 TextFieldWidget(
+                                  controller: desc,
+                                  label: 'Product Description',
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextFieldWidget(
                                   controller: price,
                                   label: 'Product Price',
                                 ),
@@ -114,7 +121,8 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  addProduct(name.text, price.text, imgUrl);
+                                  addProduct(
+                                      name.text, price.text, imgUrl, desc.text);
                                   Navigator.pop(context);
                                 },
                                 child: TextWidget(
@@ -343,6 +351,8 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
   }
 
   final name = TextEditingController();
+
+  final desc = TextEditingController();
 
   final price = TextEditingController();
 
@@ -678,7 +688,7 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                                     fontWeight: FontWeight.bold),
                               ),
                               content: const Text(
-                                'Are you sure you want to complete this order?',
+                                'Are you sure you want to complete this order and received the payment from customer?',
                                 style: TextStyle(fontFamily: 'QRegular'),
                               ),
                               actions: <Widget>[

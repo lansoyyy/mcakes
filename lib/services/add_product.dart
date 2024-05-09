@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-Future addProduct(name, price, img) async {
+Future addProduct(name, price, img, desc) async {
   final docUser = FirebaseFirestore.instance.collection('Products').doc();
 
   final json = {
@@ -12,6 +12,7 @@ Future addProduct(name, price, img) async {
     'id': docUser.id,
     'uid': FirebaseAuth.instance.currentUser!.uid,
     'dateTime': DateTime.now(),
+    'desc': desc,
   };
 
   await docUser.set(json);
