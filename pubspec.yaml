@@ -42,6 +42,7 @@ dependencies:
   firebase_storage:
   firebase_auth:
   flutter_map:
+  flutter_rating_bar:
 
 dev_dependencies:
   flutter_test:

@@ -1,13 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:mcakes/utlis/colors.dart';
 
 import '../widgets/text_widget.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  double initRating = 5;
   @override
   Widget build(BuildContext context) {
     final Stream<DocumentSnapshot> userData = FirebaseFirestore.instance
@@ -172,120 +179,253 @@ class ProfileScreen extends StatelessWidget {
                                           const SliverGridDelegateWithFixedCrossAxisCount(
                                               crossAxisCount: 4),
                                       itemBuilder: (context, index) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            showDialog(
-                                                context: context,
-                                                builder: (context) =>
-                                                    AlertDialog(
-                                                      title: const Text(
-                                                        'Cancel Confirmation',
-                                                        style: TextStyle(
-                                                            fontFamily: 'QBold',
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
+                                        return StreamBuilder<DocumentSnapshot>(
+                                            stream: FirebaseFirestore.instance
+                                                .collection('Business')
+                                                .doc(data.docs[index]
+                                                    ['businessid'])
+                                                .snapshots(),
+                                            builder: (context,
+                                                AsyncSnapshot<DocumentSnapshot>
+                                                    snapshot) {
+                                              if (!snapshot.hasData) {
+                                                return const SizedBox();
+                                              } else if (snapshot.hasError) {
+                                                return const Center(
+                                                    child: Text(
+                                                        'Something went wrong'));
+                                              } else if (snapshot
+                                                      .connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return const SizedBox();
+                                              }
+                                              dynamic data111 = snapshot.data;
+
+                                              List rates = data111['raters'];
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  if (data.docs[index]
+                                                          ['status'] ==
+                                                      'Completed') {
+                                                    if (!rates.contains(
+                                                        FirebaseAuth
+                                                            .instance
+                                                            .currentUser!
+                                                            .uid)) {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (context) =>
+                                                                  AlertDialog(
+                                                                    title:
+                                                                        const Text(
+                                                                      'Rate Store',
+                                                                      style: TextStyle(
+                                                                          fontFamily:
+                                                                              'QBold',
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                    ),
+                                                                    content: StatefulBuilder(builder:
+                                                                        (context,
+                                                                            setState) {
+                                                                      return RatingBar
+                                                                          .builder(
+                                                                        initialRating:
+                                                                            initRating,
+                                                                        minRating:
+                                                                            1,
+                                                                        direction:
+                                                                            Axis.horizontal,
+                                                                        allowHalfRating:
+                                                                            true,
+                                                                        itemCount:
+                                                                            5,
+                                                                        itemPadding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                4.0),
+                                                                        itemBuilder:
+                                                                            (context, _) =>
+                                                                                const Icon(
+                                                                          Icons
+                                                                              .star,
+                                                                          color:
+                                                                              Colors.amber,
+                                                                        ),
+                                                                        onRatingUpdate:
+                                                                            (rating) {
+                                                                          setState(
+                                                                              () {
+                                                                            initRating =
+                                                                                rating;
+                                                                          });
+                                                                        },
+                                                                      );
+                                                                    }),
+                                                                    actions: <Widget>[
+                                                                      MaterialButton(
+                                                                        onPressed:
+                                                                            () =>
+                                                                                Navigator.of(context).pop(true),
+                                                                        child:
+                                                                            const Text(
+                                                                          'Close',
+                                                                          style: TextStyle(
+                                                                              fontFamily: 'QRegular',
+                                                                              fontWeight: FontWeight.bold),
+                                                                        ),
+                                                                      ),
+                                                                      MaterialButton(
+                                                                        onPressed:
+                                                                            () async {
+                                                                          await FirebaseFirestore
+                                                                              .instance
+                                                                              .collection('Business')
+                                                                              .doc(data.docs[index]['businessid'])
+                                                                              .update({
+                                                                            'star':
+                                                                                FieldValue.increment(initRating),
+                                                                            'raters':
+                                                                                FieldValue.arrayUnion([
+                                                                              FirebaseAuth.instance.currentUser!.uid
+                                                                            ])
+                                                                          });
+                                                                          Navigator.of(context)
+                                                                              .pop();
+                                                                        },
+                                                                        child:
+                                                                            const Text(
+                                                                          'Rate',
+                                                                          style: TextStyle(
+                                                                              fontFamily: 'QRegular',
+                                                                              fontWeight: FontWeight.bold),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ));
+                                                    }
+                                                  } else {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder:
+                                                            (context) =>
+                                                                AlertDialog(
+                                                                  title:
+                                                                      const Text(
+                                                                    'Cancel Confirmation',
+                                                                    style: TextStyle(
+                                                                        fontFamily:
+                                                                            'QBold',
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  ),
+                                                                  content:
+                                                                      const Text(
+                                                                    'Are you sure you want to cancel this order?',
+                                                                    style: TextStyle(
+                                                                        fontFamily:
+                                                                            'QRegular'),
+                                                                  ),
+                                                                  actions: <Widget>[
+                                                                    MaterialButton(
+                                                                      onPressed:
+                                                                          () =>
+                                                                              Navigator.of(context).pop(true),
+                                                                      child:
+                                                                          const Text(
+                                                                        'Close',
+                                                                        style: TextStyle(
+                                                                            fontFamily:
+                                                                                'QRegular',
+                                                                            fontWeight:
+                                                                                FontWeight.bold),
+                                                                      ),
+                                                                    ),
+                                                                    MaterialButton(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        await FirebaseFirestore
+                                                                            .instance
+                                                                            .collection(
+                                                                                'Orders')
+                                                                            .doc(data
+                                                                                .docs[
+                                                                                    index]
+                                                                                .id)
+                                                                            .update({
+                                                                          'status':
+                                                                              'Cancelled'
+                                                                        });
+                                                                        Navigator.of(context)
+                                                                            .pop();
+                                                                      },
+                                                                      child:
+                                                                          const Text(
+                                                                        'Continue',
+                                                                        style: TextStyle(
+                                                                            fontFamily:
+                                                                                'QRegular',
+                                                                            fontWeight:
+                                                                                FontWeight.bold),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ));
+                                                  }
+                                                },
+                                                child: Card(
+                                                  elevation: 5,
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        height: 125,
+                                                        child: Image.network(
+                                                            data.docs[index]
+                                                                ['img']),
                                                       ),
-                                                      content: const Text(
-                                                        'Are you sure you want to cancel this order?',
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                'QRegular'),
+                                                      const SizedBox(
+                                                        height: 10,
                                                       ),
-                                                      actions: <Widget>[
-                                                        MaterialButton(
-                                                          onPressed: () =>
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop(true),
-                                                          child: const Text(
-                                                            'Close',
-                                                            style: TextStyle(
-                                                                fontFamily:
-                                                                    'QRegular',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ),
-                                                        ),
-                                                        MaterialButton(
-                                                          onPressed: () async {
-                                                            await FirebaseFirestore
-                                                                .instance
-                                                                .collection(
-                                                                    'Orders')
-                                                                .doc(data
-                                                                    .docs[index]
-                                                                    .id)
-                                                                .update({
-                                                              'status':
-                                                                  'Cancelled'
-                                                            });
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: const Text(
-                                                            'Continue',
-                                                            style: TextStyle(
-                                                                fontFamily:
-                                                                    'QRegular',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ));
-                                          },
-                                          child: Card(
-                                            elevation: 5,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width: double.infinity,
-                                                  height: 125,
-                                                  child: Image.network(
-                                                      data.docs[index]['img']),
+                                                      TextWidget(
+                                                        text: data.docs[index]
+                                                                ['name'] +
+                                                            ' ' +
+                                                            data.docs[index]
+                                                                    ['qty']
+                                                                .toString(),
+                                                        fontSize: 13,
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      TextWidget(
+                                                        text:
+                                                            '₱${data.docs[index]['price'] * data.docs[index]['qty']}.00',
+                                                        fontSize: 16,
+                                                        fontFamily: 'Bold',
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      TextWidget(
+                                                        text: data.docs[index]
+                                                            ['status'],
+                                                        fontSize: 12,
+                                                        fontFamily: 'Bold',
+                                                        color: primary,
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                TextWidget(
-                                                  text: data.docs[index]
-                                                          ['name'] +
-                                                      ' ' +
-                                                      data.docs[index]['qty']
-                                                          .toString(),
-                                                  fontSize: 13,
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                TextWidget(
-                                                  text:
-                                                      '₱${data.docs[index]['price'] * data.docs[index]['qty']}.00',
-                                                  fontSize: 16,
-                                                  fontFamily: 'Bold',
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                TextWidget(
-                                                  text: data.docs[index]
-                                                      ['status'],
-                                                  fontSize: 12,
-                                                  fontFamily: 'Bold',
-                                                  color: primary,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
+                                              );
+                                            });
                                       },
                                     ),
                                   );

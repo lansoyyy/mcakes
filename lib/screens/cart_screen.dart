@@ -158,6 +158,8 @@ class _CartScreenState extends State<CartScreen> {
 
                                               if (value == true) {
                                                 setState(() {
+                                                  id = data.docs[index]
+                                                      ['businessid'];
                                                   itemids
                                                       .add(data.docs[index].id);
                                                   itemnames.add(
@@ -173,6 +175,8 @@ class _CartScreenState extends State<CartScreen> {
                                                 });
                                               } else {
                                                 setState(() {
+                                                  id = data.docs[index]
+                                                      ['businessid'];
                                                   itemids.remove(
                                                       data.docs[index].id);
                                                   itemnames.remove(

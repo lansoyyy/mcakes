@@ -17,7 +17,9 @@ Future addBusiness(
     'deliveryfee': deliveryfee,
     'id': docUser.id,
     'img': img,
-    'type': 'Business'
+    'type': 'Business',
+    'star': 0,
+    'raters': [],
   };
 
   await docUser.set(json);

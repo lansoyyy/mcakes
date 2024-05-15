@@ -146,7 +146,17 @@ class _StoreTabState extends State<StoreTab> {
                               color: Colors.white,
                             ),
                             const SizedBox(
-                              height: 20,
+                              height: 5,
+                            ),
+                            TextWidget(
+                              text:
+                                  '☆ ${(data.docs[index]['star'] / data.docs[index]['raters'].length)}',
+                              fontSize: 18,
+                              fontFamily: 'Bold',
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(
+                              height: 15,
                             ),
                             ButtonWidget(
                               textColor: primary,
