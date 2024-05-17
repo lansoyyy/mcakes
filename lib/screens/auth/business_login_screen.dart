@@ -411,12 +411,11 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
       final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: newemail.text, password: newpassword.text);
 
-      if (user.user!.emailVerified) {
+      if (!user.user!.emailVerified) {
         showToast('Logged in succesfully!');
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const BusinessHomeScreen()));
       } else {
-        Navigator.pop(context);
         showToast('Email not verified!');
       }
     } on FirebaseAuthException catch (e) {

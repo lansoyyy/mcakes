@@ -3,10 +3,13 @@ import 'dart:html';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:mcakes/screens/auth/login_screen.dart';
 import 'package:mcakes/services/add_product.dart';
+import 'package:mcakes/widgets/button_widget.dart';
 import 'package:mcakes/widgets/textfield_widget.dart';
 import 'package:mcakes/widgets/toast_widget.dart';
 
@@ -138,6 +141,9 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                       );
                     },
                   ),
+                  const SizedBox(
+                    width: 20,
+                  ),
                   FloatingActionButton(
                     backgroundColor: primary,
                     child: const Icon(
@@ -231,16 +237,21 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Center(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: Image.network(
-                                        data['img'],
-                                        height: 200,
+                                GestureDetector(
+                                  onTap: () {
+                                    updateProfile();
+                                  },
+                                  child: Center(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(20.0),
+                                        child: Image.network(
+                                          data['img'],
+                                          height: 200,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -248,18 +259,31 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                                 const SizedBox(
                                   height: 20,
                                 ),
-                                Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: TextWidget(
-                                      text: 'About Us',
-                                      fontSize: 24,
-                                      color: Colors.black,
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      namenew.text = data['name'];
+                                      descnew.text = data['desc'];
+                                      captionnew.text = data['caption'];
+                                      openingnew.text = data['opening'];
+                                      closingnew.text = data['closing'];
+                                      deliveryfeenew.text = data['deliveryfee'];
+                                    });
+                                    editDialog();
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: TextWidget(
+                                        text: 'Edit Details',
+                                        fontSize: 24,
+                                        color: Colors.black,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -355,6 +379,107 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
   final desc = TextEditingController();
 
   final price = TextEditingController();
+
+  final namenew = TextEditingController();
+  final descnew = TextEditingController();
+  final captionnew = TextEditingController();
+  final openingnew = TextEditingController();
+  final closingnew = TextEditingController();
+  final deliveryfeenew = TextEditingController();
+
+  editDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: 350,
+            height: 600,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TextFieldWidget(
+                      color: Colors.black,
+                      controller: namenew,
+                      label: 'Store Name',
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFieldWidget(
+                      color: Colors.black,
+                      controller: descnew,
+                      label: 'Store Description',
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFieldWidget(
+                      color: Colors.black,
+                      controller: captionnew,
+                      label: 'Store Caption',
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFieldWidget(
+                      color: Colors.black,
+                      controller: openingnew,
+                      label: 'Opening Time',
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFieldWidget(
+                      color: Colors.black,
+                      controller: closingnew,
+                      label: 'Closing Time',
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFieldWidget(
+                      color: Colors.black,
+                      controller: deliveryfeenew,
+                      label: 'Delivery Fee',
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Center(
+                      child: ButtonWidget(
+                        color: primary,
+                        label: 'Update',
+                        onPressed: () async {
+                          await FirebaseFirestore.instance
+                              .collection('Business')
+                              .doc()
+                              .update({
+                            'name': namenew.text,
+                            'desc': descnew.text,
+                            'deliveryfee': deliveryfeenew.text,
+                            'caption': captionnew.text,
+                            'opening': openingnew.text,
+                            'closing': closingnew.text
+                          });
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Widget product(bool inedit) {
     return StreamBuilder<QuerySnapshot>(
@@ -777,6 +902,31 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
   }
 
   late String? imgUrl = '';
+
+  updateProfile() {
+    InputElement input = FileUploadInputElement() as InputElement
+      ..accept = 'image/*';
+    FirebaseStorage fs = FirebaseStorage.instance;
+    input.click();
+    input.onChange.listen((event) {
+      final file = input.files!.first;
+      final reader = FileReader();
+      reader.readAsDataUrl(file);
+      reader.onLoadEnd.listen((event) async {
+        var snapshot = await fs.ref().child('newfile').putBlob(file);
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        showToast('Uploaded Succesfully!');
+        print(downloadUrl);
+        await FirebaseFirestore.instance
+            .collection('Business')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({'img': downloadUrl});
+        setState(() {
+          imgUrl = downloadUrl;
+        });
+      });
+    });
+  }
 
   uploadToStorage() {
     InputElement input = FileUploadInputElement() as InputElement
