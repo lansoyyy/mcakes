@@ -20,6 +20,7 @@ Future addBusiness(
     'type': 'Business',
     'star': 0,
     'raters': [],
+    'isVerified': false,
   };
 
   await docUser.set(json);

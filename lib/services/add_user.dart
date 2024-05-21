@@ -11,6 +11,7 @@ Future addUser(name, email, number) async {
     'number': number,
     'email': email,
     'id': docUser.id,
+    'isVerified': false,
   };
 
   await docUser.set(json);
