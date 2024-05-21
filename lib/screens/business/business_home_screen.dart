@@ -769,6 +769,8 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
         });
   }
 
+  final ref = TextEditingController();
+
   Widget orders() {
     return StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -812,9 +814,22 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                                     fontFamily: 'QBold',
                                     fontWeight: FontWeight.bold),
                               ),
-                              content: const Text(
-                                'Are you sure you want to complete this order and received the payment from customer?',
-                                style: TextStyle(fontFamily: 'QRegular'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'Are you sure you want to complete this order and received the payment from customer?',
+                                    style: TextStyle(fontFamily: 'QRegular'),
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  TextFieldWidget(
+                                    controller: ref,
+                                    label:
+                                        'Enter reference number (for gcash payment only)',
+                                  ),
+                                ],
                               ),
                               actions: <Widget>[
                                 MaterialButton(
@@ -832,7 +847,10 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
                                     await FirebaseFirestore.instance
                                         .collection('Orders')
                                         .doc(data.docs[index].id)
-                                        .update({'status': 'Completed'});
+                                        .update({
+                                      'status': 'Completed',
+                                      'ref': ref.text
+                                    });
                                     Navigator.of(context).pop();
                                   },
                                   child: const Text(

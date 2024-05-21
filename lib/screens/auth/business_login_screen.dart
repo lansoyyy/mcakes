@@ -78,6 +78,29 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
     });
   }
 
+  late String? imgUrl2 = '';
+
+  uploadToStorage2() {
+    InputElement input = FileUploadInputElement() as InputElement
+      ..accept = 'image/*';
+    FirebaseStorage fs = FirebaseStorage.instance;
+    input.click();
+    input.onChange.listen((event) {
+      final file = input.files!.first;
+      final reader = FileReader();
+      reader.readAsDataUrl(file);
+      reader.onLoadEnd.listen((event) async {
+        var snapshot = await fs.ref().child('newfile').putBlob(file);
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        showToast('Uploaded Succesfully!');
+
+        setState(() {
+          imgUrl2 = downloadUrl;
+        });
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -285,6 +308,30 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                       ),
                     ),
                     const SizedBox(
+                      height: 20,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        //Image? fromPicker =
+                        //     await ImagePickerWeb.getImageAsWidget();
+                        uploadToStorage2();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey[500],
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
+                          child: TextWidget(
+                            text: 'GCash QR',
+                            fontSize: 14,
+                            fontFamily: 'Bold',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
                       height: 10,
                     ),
                     TextFieldWidget(
@@ -385,7 +432,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
       await FirebaseAuth.instance.currentUser!.sendEmailVerification();
 
       addBusiness(name.text, caption.text, desc.text, opening.text,
-          closing.text, deliveryfee.text, imgUrl, imgUrl1);
+          closing.text, deliveryfee.text, imgUrl, imgUrl1, imgUrl2);
 
       showToast(
           "Registered Successfully! A verification process was sent to your email");

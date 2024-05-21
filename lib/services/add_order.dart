@@ -15,7 +15,8 @@ Future addOrder(businessid, productid, name, price, qty, img, myname) async {
     'id': docUser.id,
     'uid': FirebaseAuth.instance.currentUser!.uid,
     'dateTime': DateTime.now(),
-    'status': 'Pending'
+    'status': 'Pending',
+    'refnumber': '',
   };
 
   await docUser.set(json);
