@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mcakes/screens/admin_home.dart';
@@ -275,13 +276,22 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (context) => const AdminHomeScreen()));
     } else {
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
+        final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
             email: newemailController.text,
             password: newpasswordController.text);
 
-        showToast('Logged in succesfully!');
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()));
+        DocumentSnapshot doc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.user!.uid)
+            .get();
+
+        if (doc['isVerified']) {
+          showToast('Logged in succesfully!');
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen()));
+        } else {
+          showToast('Youre account is not yet verified!');
+        }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'user-not-found') {
           showToast("No user found with that email.");

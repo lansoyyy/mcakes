@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -458,12 +459,17 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
       final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: newemail.text, password: newpassword.text);
 
-      if (!user.user!.emailVerified) {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('Business')
+          .doc(user.user!.uid)
+          .get();
+
+      if (doc['isVerified']) {
         showToast('Logged in succesfully!');
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const BusinessHomeScreen()));
       } else {
-        showToast('Email not verified!');
+        showToast('Email not yet verified!');
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
