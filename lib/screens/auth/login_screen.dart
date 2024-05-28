@@ -112,7 +112,15 @@ class _LoginPageState extends State<LoginPage> {
                           color: primary,
                           label: 'Login',
                           onPressed: (() async {
-                            login(context);
+                            if (newemailController.text == 'rizabahian' &&
+                                newpasswordController.text == 'rizabahian') {
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AdminHomeScreen()));
+                            } else {
+                              login(context);
+                            }
                           })),
                     ),
                     const SizedBox(
@@ -270,43 +278,36 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   login(context) async {
-    if (emailController.text == 'rizabahian@gmail.com' &&
-        passwordController.text == 'rizabahian') {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const AdminHomeScreen()));
-    } else {
-      try {
-        final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: newemailController.text,
-            password: newpasswordController.text);
+    try {
+      final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: newemailController.text, password: newpasswordController.text);
 
-        DocumentSnapshot doc = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.user!.uid)
-            .get();
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.user!.uid)
+          .get();
 
-        if (doc['isVerified']) {
-          showToast('Logged in succesfully!');
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomeScreen()));
-        } else {
-          showToast('Youre account is not yet verified!');
-        }
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found') {
-          showToast("No user found with that email.");
-        } else if (e.code == 'wrong-password') {
-          showToast("Wrong password provided for that user.");
-        } else if (e.code == 'invalid-email') {
-          showToast("Invalid email provided.");
-        } else if (e.code == 'user-disabled') {
-          showToast("User account has been disabled.");
-        } else {
-          showToast("An error occurred: ${e.message}");
-        }
-      } on Exception catch (e) {
-        showToast("An error occurred: $e");
+      if (doc['isVerified']) {
+        showToast('Logged in succesfully!');
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()));
+      } else {
+        showToast('Your account is not yet verified!');
       }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        showToast("No user found with that email.");
+      } else if (e.code == 'wrong-password') {
+        showToast("Wrong password provided for that user.");
+      } else if (e.code == 'invalid-email') {
+        showToast("Invalid email provided.");
+      } else if (e.code == 'user-disabled') {
+        showToast("User account has been disabled.");
+      } else {
+        showToast("An error occurred: ${e.message}");
+      }
+    } on Exception catch (e) {
+      showToast("An error occurred: $e");
     }
   }
 }

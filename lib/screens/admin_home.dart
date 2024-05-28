@@ -27,10 +27,10 @@ class AdminHomeScreen extends StatelessWidget {
             const TabBar(
               tabs: [
                 Tab(
-                  text: 'Users',
+                  text: 'User',
                 ),
                 Tab(
-                  text: 'Businesses',
+                  text: 'Business',
                 ),
               ],
             ),
@@ -45,7 +45,7 @@ class AdminHomeScreen extends StatelessWidget {
                       builder: (BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (snapshot.hasError) {
-                          print('error');
+                          print('error ${snapshot.error}');
                           return const Center(child: Text('Error'));
                         }
                         if (snapshot.connectionState ==
@@ -62,9 +62,6 @@ class AdminHomeScreen extends StatelessWidget {
                         final data = snapshot.requireData;
                         return ListView.separated(
                             itemBuilder: (context, index) {
-                              return const Divider();
-                            },
-                            separatorBuilder: (context, index) {
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -100,6 +97,9 @@ class AdminHomeScreen extends StatelessWidget {
                                 ],
                               );
                             },
+                            separatorBuilder: (context, index) {
+                              return const Divider();
+                            },
                             itemCount: data.docs.length);
                       }),
                   StreamBuilder<QuerySnapshot>(
@@ -125,11 +125,9 @@ class AdminHomeScreen extends StatelessWidget {
                         }
 
                         final data = snapshot.requireData;
+
                         return ListView.separated(
                             itemBuilder: (context, index) {
-                              return const Divider();
-                            },
-                            separatorBuilder: (context, index) {
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -164,6 +162,9 @@ class AdminHomeScreen extends StatelessWidget {
                                   ),
                                 ],
                               );
+                            },
+                            separatorBuilder: (context, index) {
+                              return const Divider();
                             },
                             itemCount: data.docs.length);
                       }),

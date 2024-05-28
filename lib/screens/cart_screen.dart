@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mcakes/services/add_order.dart';
+import 'package:mcakes/widgets/textfield_widget.dart';
 import 'package:mcakes/widgets/toast_widget.dart';
 
 import '../utlis/colors.dart';
@@ -26,6 +29,12 @@ class _CartScreenState extends State<CartScreen> {
   List<bool> added = [];
 
   String id = '';
+
+  int toadd = 0;
+
+  String img = '';
+
+  final refno = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final Stream<DocumentSnapshot> userData = FirebaseFirestore.instance
@@ -148,51 +157,98 @@ class _CartScreenState extends State<CartScreen> {
                                               ),
                                             ],
                                           ),
-                                          trailing: Checkbox(
-                                            value: data.docs[index]['checked'],
-                                            onChanged: (value) async {
-                                              await FirebaseFirestore.instance
-                                                  .collection('Cart')
-                                                  .doc(data.docs[index].id)
-                                                  .update({'checked': value});
+                                          trailing: StreamBuilder<
+                                                  DocumentSnapshot>(
+                                              stream: FirebaseFirestore.instance
+                                                  .collection('Business')
+                                                  .doc(data.docs[index]
+                                                      ['businessid'])
+                                                  .snapshots(),
+                                              builder: (context,
+                                                  AsyncSnapshot<
+                                                          DocumentSnapshot>
+                                                      snapshot) {
+                                                if (!snapshot.hasData) {
+                                                  return const SizedBox();
+                                                } else if (snapshot.hasError) {
+                                                  return const Center(
+                                                      child: Text(
+                                                          'Something went wrong'));
+                                                } else if (snapshot
+                                                        .connectionState ==
+                                                    ConnectionState.waiting) {
+                                                  return const SizedBox();
+                                                }
+                                                dynamic businessdata =
+                                                    snapshot.data;
+                                                img = businessdata['gcash'];
+                                                return Checkbox(
+                                                  value: data.docs[index]
+                                                      ['checked'],
+                                                  onChanged: (value) async {
+                                                    await FirebaseFirestore
+                                                        .instance
+                                                        .collection('Cart')
+                                                        .doc(
+                                                            data.docs[index].id)
+                                                        .update(
+                                                            {'checked': value});
 
-                                              if (value == true) {
-                                                setState(() {
-                                                  id = data.docs[index]
-                                                      ['businessid'];
-                                                  itemids
-                                                      .add(data.docs[index].id);
-                                                  itemnames.add(
-                                                      data.docs[index]['name']);
-                                                  itemprices.add(int.parse(
-                                                          data.docs[index]
-                                                              ['price']) *
-                                                      data.docs[index]['qty']);
-                                                  itemqty.add(
-                                                      data.docs[index]['qty']);
-                                                  itemimg.add(
-                                                      data.docs[index]['img']);
-                                                });
-                                              } else {
-                                                setState(() {
-                                                  id = data.docs[index]
-                                                      ['businessid'];
-                                                  itemids.remove(
-                                                      data.docs[index].id);
-                                                  itemnames.remove(
-                                                      data.docs[index]['name']);
-                                                  itemprices.remove(int.parse(
-                                                          data.docs[index]
-                                                              ['price']) *
-                                                      data.docs[index]['qty']);
-                                                  itemqty.remove(
-                                                      data.docs[index]['qty']);
-                                                  itemimg.remove(
-                                                      data.docs[index]['img']);
-                                                });
-                                              }
-                                            },
-                                          )),
+                                                    if (value == true) {
+                                                      setState(() {
+                                                        toadd += int.parse(
+                                                            businessdata[
+                                                                'deliveryfee']);
+                                                        id = data.docs[index]
+                                                            ['businessid'];
+                                                        itemids.add(data
+                                                            .docs[index].id);
+                                                        itemnames.add(
+                                                            data.docs[index]
+                                                                ['name']);
+                                                        itemprices.add(
+                                                            int.parse(data.docs[
+                                                                        index]
+                                                                    ['price']) *
+                                                                data.docs[index]
+                                                                    ['qty']);
+                                                        itemqty.add(
+                                                            data.docs[index]
+                                                                ['qty']);
+                                                        itemimg.add(
+                                                            data.docs[index]
+                                                                ['img']);
+                                                      });
+                                                    } else {
+                                                      setState(() {
+                                                        toadd = toadd -
+                                                            int.parse(businessdata[
+                                                                'deliveryfee']);
+
+                                                        id = data.docs[index]
+                                                            ['businessid'];
+                                                        itemids.remove(data
+                                                            .docs[index].id);
+                                                        itemnames.remove(
+                                                            data.docs[index]
+                                                                ['name']);
+                                                        itemprices.remove(int
+                                                                .parse(data.docs[
+                                                                        index]
+                                                                    ['price']) *
+                                                            data.docs[index]
+                                                                ['qty']);
+                                                        itemqty.remove(
+                                                            data.docs[index]
+                                                                ['qty']);
+                                                        itemimg.remove(
+                                                            data.docs[index]
+                                                                ['img']);
+                                                      });
+                                                    }
+                                                  },
+                                                );
+                                              })),
                                     );
                                   },
                                 ),
@@ -211,7 +267,7 @@ class _CartScreenState extends State<CartScreen> {
                               TextWidget(
                                 text: itemprices.isEmpty
                                     ? 'Total: ₱00.00'
-                                    : 'Total: ₱${itemprices.reduce((value, element) => value + element)}.00',
+                                    : 'Total: ₱${itemprices.reduce((value, element) => value + element) + toadd}.00',
                                 fontSize: 32,
                               ),
                               const SizedBox(
@@ -246,23 +302,193 @@ class _CartScreenState extends State<CartScreen> {
                                 height: 50,
                                 label: 'Checkout',
                                 onPressed: () async {
-                                  for (int i = 0; i < itemids.length; i++) {
-                                    await FirebaseFirestore.instance
-                                        .collection('Cart')
-                                        .doc(itemids[i])
-                                        .delete();
-                                    addOrder(
-                                        id,
-                                        itemids[i],
-                                        itemnames[i],
-                                        itemprices[i],
-                                        itemqty[i],
-                                        itemimg[i],
-                                        mydata['name']);
-                                  }
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return Dialog(
+                                        child: SizedBox(
+                                          width: 500,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(20.0),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextWidget(
+                                                  text: 'Payment Method',
+                                                  fontSize: 18,
+                                                ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.pop(context);
+                                                    showDialog(
+                                                        context: context,
+                                                        builder:
+                                                            (context) =>
+                                                                AlertDialog(
+                                                                  title:
+                                                                      const Text(
+                                                                    'GCash QR Code',
+                                                                    style: TextStyle(
+                                                                        fontFamily:
+                                                                            'QBold',
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  ),
+                                                                  content:
+                                                                      SizedBox(
+                                                                    height: 250,
+                                                                    width: 250,
+                                                                    child: Image
+                                                                        .network(
+                                                                            img),
+                                                                  ),
+                                                                  actions: <Widget>[
+                                                                    MaterialButton(
+                                                                      onPressed:
+                                                                          () =>
+                                                                              Navigator.of(context).pop(true),
+                                                                      child:
+                                                                          const Text(
+                                                                        'Close',
+                                                                        style: TextStyle(
+                                                                            fontFamily:
+                                                                                'QRegular',
+                                                                            fontWeight:
+                                                                                FontWeight.bold),
+                                                                      ),
+                                                                    ),
+                                                                    MaterialButton(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        Navigator.of(context)
+                                                                            .pop();
 
-                                  Navigator.pop(context);
-                                  showToast('Checked out succesfully!');
+                                                                        showDialog(
+                                                                            context:
+                                                                                context,
+                                                                            builder: (context) =>
+                                                                                AlertDialog(
+                                                                                  title: const Text(
+                                                                                    'Enter Reference Number',
+                                                                                    style: TextStyle(fontFamily: 'QBold', fontWeight: FontWeight.bold),
+                                                                                  ),
+                                                                                  content: Column(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    children: [
+                                                                                      TextFieldWidget(
+                                                                                        controller: refno,
+                                                                                        label: 'Reference Number',
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                  actions: <Widget>[
+                                                                                    MaterialButton(
+                                                                                      onPressed: () => Navigator.of(context).pop(true),
+                                                                                      child: const Text(
+                                                                                        'Close',
+                                                                                        style: TextStyle(fontFamily: 'QRegular', fontWeight: FontWeight.bold),
+                                                                                      ),
+                                                                                    ),
+                                                                                    MaterialButton(
+                                                                                      onPressed: () async {
+                                                                                        for (int i = 0; i < itemids.length; i++) {
+                                                                                          await FirebaseFirestore.instance.collection('Cart').doc(itemids[i]).delete();
+                                                                                          addOrder(id, itemids[i], itemnames[i], itemprices[i] + toadd, itemqty[i], itemimg[i], mydata['name']);
+                                                                                        }
+
+                                                                                        Navigator.pop(context);
+                                                                                        showToast('Checked out succesfully!');
+                                                                                      },
+                                                                                      child: const Text(
+                                                                                        'Done',
+                                                                                        style: TextStyle(fontFamily: 'QRegular', fontWeight: FontWeight.bold),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ],
+                                                                                ));
+                                                                      },
+                                                                      child:
+                                                                          const Text(
+                                                                        'Done',
+                                                                        style: TextStyle(
+                                                                            fontFamily:
+                                                                                'QRegular',
+                                                                            fontWeight:
+                                                                                FontWeight.bold),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ));
+                                                  },
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.radio_button_off,
+                                                      ),
+                                                      const SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      TextWidget(
+                                                        text: 'GCash',
+                                                        fontSize: 14,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const Divider(),
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    for (int i = 0;
+                                                        i < itemids.length;
+                                                        i++) {
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection('Cart')
+                                                          .doc(itemids[i])
+                                                          .delete();
+                                                      addOrder(
+                                                          id,
+                                                          itemids[i],
+                                                          itemnames[i],
+                                                          itemprices[i] + toadd,
+                                                          itemqty[i],
+                                                          itemimg[i],
+                                                          mydata['name']);
+                                                    }
+
+                                                    Navigator.pop(context);
+                                                    showToast(
+                                                        'Checked out succesfully!');
+                                                  },
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.radio_button_off,
+                                                      ),
+                                                      const SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      TextWidget(
+                                                        text: 'Cash',
+                                                        fontSize: 14,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
                                 },
                               ),
                             ],

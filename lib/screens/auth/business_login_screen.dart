@@ -456,21 +456,25 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
 
   login(context) async {
     try {
-      final user = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: newemail.text, password: newpassword.text);
+      final user = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: newemail.text, password: newpassword.text)
+          .then((value) async {
+        DocumentSnapshot doc = await FirebaseFirestore.instance
+            .collection('Business')
+            .doc(value.user!.uid)
+            .get();
 
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('Business')
-          .doc(user.user!.uid)
-          .get();
+        if (doc['isVerified']) {
+          showToast('Logged in succesfully!');
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const BusinessHomeScreen()));
+        } else {
+          showToast('Email not yet verified!');
+        }
+      });
 
-      if (doc['isVerified']) {
-        showToast('Logged in succesfully!');
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => const BusinessHomeScreen()));
-      } else {
-        showToast('Email not yet verified!');
-      }
+      print(user);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         showToast("No user found with that email.");
