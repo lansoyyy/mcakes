@@ -24,6 +24,19 @@ class _StoreTabState extends State<StoreTab> {
 
   String id = '';
 
+  int _currentStep = 0;
+  String? _selectedSize;
+  String? _selectedFlavour;
+  String? _selectedShape;
+  String? _selectedTopping1;
+  String? _selectedTopping2;
+
+  final List<String> _sizes = ['Small', 'Medium', 'Large'];
+  final List<String> _flavours = ['Vanilla', 'Chocolate', 'Strawberry'];
+  final List<String> _shapes = ['Round', 'Square', 'Heart'];
+  final List<String> _toppings1 = ['Sprinkles', 'Fruit', 'Chocolate Chips'];
+  final List<String> _toppings2 = ['Nuts', 'Coconut', 'Candy'];
+
   dynamic productData = {};
   @override
   Widget build(BuildContext context) {
@@ -189,206 +202,224 @@ class _StoreTabState extends State<StoreTab> {
   Widget storeWidget() {
     final Stream<DocumentSnapshot> userData =
         FirebaseFirestore.instance.collection('Business').doc(id).snapshots();
-    return StreamBuilder<DocumentSnapshot>(
-        stream: userData,
-        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (!snapshot.hasData) {
-            return const SizedBox();
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SizedBox();
-          }
-          dynamic data = snapshot.data;
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: 150,
-                  color: primary,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      TextWidget(
-                        text: data['name'],
-                        fontSize: 65,
-                        fontFamily: 'Bold',
-                        color: Colors.white,
-                      ),
-                      TextWidget(
-                        text: data['caption'],
-                        fontSize: 24,
-                        fontFamily: 'Bold',
-                        color: Colors.white,
-                      ),
-                    ],
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(
+          Icons.edit,
+        ),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return Dialog(
+                child: customWidget(),
+              );
+            },
+          );
+        },
+      ),
+      body: StreamBuilder<DocumentSnapshot>(
+          stream: userData,
+          builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (!snapshot.hasData) {
+              return const SizedBox();
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Something went wrong'));
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox();
+            }
+            dynamic data = snapshot.data;
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 150,
+                    color: primary,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        TextWidget(
+                          text: data['name'],
+                          fontSize: 65,
+                          fontFamily: 'Bold',
+                          color: Colors.white,
+                        ),
+                        TextWidget(
+                          text: data['caption'],
+                          fontSize: 24,
+                          fontFamily: 'Bold',
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      height: 700,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Image.network(
-                                  data['img'],
-                                  height: 200,
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 300,
+                        height: 700,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Image.network(
+                                    data['img'],
+                                    height: 200,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(100),
+                            const SizedBox(
+                              height: 20,
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: TextWidget(
-                                text: 'About Us',
-                                fontSize: 24,
-                                color: Colors.black,
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: TextWidget(
+                                  text: 'About Us',
+                                  fontSize: 24,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          TextWidget(
-                            text: data['desc'],
-                            fontSize: 18,
-                            color: Colors.black,
-                          ),
-                          const Divider(),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          TextWidget(
-                            text: 'Opening Time: ${data['opening']}',
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                          TextWidget(
-                            text: 'Closing Time: ${data['closing']}',
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                          TextWidget(
-                            text: 'Delivery Fee: ${data['deliveryfee']} Php',
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('Products')
-                            .where('uid', isEqualTo: id)
-                            .snapshots(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<QuerySnapshot> snapshot) {
-                          if (snapshot.hasError) {
-                            print('error');
-                            return const Center(child: Text('Error'));
-                          }
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Padding(
-                              padding: EdgeInsets.only(top: 50),
-                              child: Center(
-                                  child: CircularProgressIndicator(
-                                color: Colors.black,
-                              )),
-                            );
-                          }
-
-                          final data = snapshot.requireData;
-                          return SizedBox(
-                            width: 900,
-                            height: 500,
-                            child: GridView.builder(
-                              itemCount: data.docs.length,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 4),
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      productData = data.docs[index];
-                                      isproduct = true;
-                                    });
-                                  },
-                                  child: Card(
-                                    elevation: 5,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: double.infinity,
-                                          height: 150,
-                                          color: Colors.grey[200],
-                                          child: Image.network(
-                                              data.docs[index]['img']),
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        TextWidget(
-                                          text: data.docs[index]['name'],
-                                          fontSize: 13,
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        TextWidget(
-                                          text:
-                                              '₱${data.docs[index]['price']}.00',
-                                          fontSize: 16,
-                                          fontFamily: 'Bold',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
+                            const SizedBox(
+                              height: 10,
                             ),
-                          );
-                        }),
-                  ],
-                ),
-              ],
-            ),
-          );
-        });
+                            TextWidget(
+                              text: data['desc'],
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                            const Divider(),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            TextWidget(
+                              text: 'Opening Time: ${data['opening']}',
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                            TextWidget(
+                              text: 'Closing Time: ${data['closing']}',
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                            TextWidget(
+                              text: 'Delivery Fee: ${data['deliveryfee']} Php',
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('Products')
+                              .where('uid', isEqualTo: id)
+                              .snapshots(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              print('error');
+                              return const Center(child: Text('Error'));
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 50),
+                                child: Center(
+                                    child: CircularProgressIndicator(
+                                  color: Colors.black,
+                                )),
+                              );
+                            }
+
+                            final data = snapshot.requireData;
+                            productData = data.docs.first;
+                            return SizedBox(
+                              width: 900,
+                              height: 500,
+                              child: GridView.builder(
+                                itemCount: data.docs.length,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 4),
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        productData = data.docs[index];
+                                        isproduct = true;
+                                      });
+                                    },
+                                    child: Card(
+                                      elevation: 5,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            height: 150,
+                                            color: Colors.grey[200],
+                                            child: Image.network(
+                                                data.docs[index]['img']),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          TextWidget(
+                                            text: data.docs[index]['name'],
+                                            fontSize: 13,
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          TextWidget(
+                                            text:
+                                                '₱${data.docs[index]['price']}.00',
+                                            fontSize: 16,
+                                            fontFamily: 'Bold',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          }),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+    );
   }
 
   int qty = 1;
@@ -557,5 +588,170 @@ class _StoreTabState extends State<StoreTab> {
         ],
       ),
     );
+  }
+
+  Widget customWidget() {
+    return StatefulBuilder(builder: (context, setState) {
+      return Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Expanded(
+              child: Stepper(
+                type: StepperType.vertical,
+                currentStep: _currentStep,
+                onStepTapped: (step) => setState(() => _currentStep = step),
+                onStepContinue: _currentStep < 5
+                    ? () => setState(() => _currentStep += 1)
+                    : null,
+                onStepCancel: _currentStep > 0
+                    ? () => setState(() => _currentStep -= 1)
+                    : null,
+                steps: [
+                  Step(
+                    title: const Text('Size'),
+                    content: DropdownButtonFormField<String>(
+                      value: _selectedSize,
+                      items: _sizes.map((size) {
+                        return DropdownMenuItem<String>(
+                          value: size,
+                          child: Text(size),
+                        );
+                      }).toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedSize = value),
+                      decoration: const InputDecoration(
+                        labelText: 'Select Size',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    isActive: _currentStep == 0,
+                  ),
+                  Step(
+                    title: const Text('Flavours'),
+                    content: DropdownButtonFormField<String>(
+                      value: _selectedFlavour,
+                      items: _flavours.map((flavour) {
+                        return DropdownMenuItem<String>(
+                          value: flavour,
+                          child: Text(flavour),
+                        );
+                      }).toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedFlavour = value),
+                      decoration: const InputDecoration(
+                        labelText: 'Select Flavour',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    isActive: _currentStep == 1,
+                  ),
+                  Step(
+                    title: const Text('Shape'),
+                    content: DropdownButtonFormField<String>(
+                      value: _selectedShape,
+                      items: _shapes.map((shape) {
+                        return DropdownMenuItem<String>(
+                          value: shape,
+                          child: Text(shape),
+                        );
+                      }).toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedShape = value),
+                      decoration: const InputDecoration(
+                        labelText: 'Select Shape',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    isActive: _currentStep == 2,
+                  ),
+                  Step(
+                    title: const Text('Toppings 1'),
+                    content: DropdownButtonFormField<String>(
+                      value: _selectedTopping1,
+                      items: _toppings1.map((topping) {
+                        return DropdownMenuItem<String>(
+                          value: topping,
+                          child: Text(topping),
+                        );
+                      }).toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedTopping1 = value),
+                      decoration: const InputDecoration(
+                        labelText: 'Select Topping 1',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    isActive: _currentStep == 3,
+                  ),
+                  Step(
+                    title: const Text('Toppings 2'),
+                    content: DropdownButtonFormField<String>(
+                      value: _selectedTopping2,
+                      items: _toppings2.map((topping) {
+                        return DropdownMenuItem<String>(
+                          value: topping,
+                          child: Text(topping),
+                        );
+                      }).toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedTopping2 = value),
+                      decoration: const InputDecoration(
+                        labelText: 'Select Topping 2',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    isActive: _currentStep == 4,
+                  ),
+                  Step(
+                    title: const Text('Review Selections'),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text('Size: ${_selectedSize ?? "Not selected"}'),
+                        Text('Flavour: ${_selectedFlavour ?? "Not selected"}'),
+                        Text('Shape: ${_selectedShape ?? "Not selected"}'),
+                        Text(
+                            'Topping 1: ${_selectedTopping1 ?? "Not selected"}'),
+                        Text(
+                            'Topping 2: ${_selectedTopping2 ?? "Not selected"}'),
+                      ],
+                    ),
+                    isActive: _currentStep == 5,
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    // Add your submission logic here
+                    Navigator.of(context).pop();
+
+                    addCart(productData['uid'], productData.id,
+                        'Customized Cake', '760', qty, productData['img']);
+                    // Add to cart func
+                    setState(() {
+                      isproduct = false;
+                      hasvisited = true;
+                    });
+
+                    showToast('Product added to cart!');
+                  },
+                  child: const Text('SUBMIT'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('CANCEL'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
